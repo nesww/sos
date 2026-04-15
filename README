@@ -1,0 +1,7 @@
+Basic bootloader & kernel (x86 32bit)
+
+Now:
+- the bootloader starts the kernel
+- the kernel write a basic message via VGA
+
+See Makefile to build the image and run it with QEMU.
