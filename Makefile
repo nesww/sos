@@ -2,24 +2,34 @@ ASM = nasm
 CC = i686-elf-gcc
 LD = i686-elf-ld
 
-CFLAGS = -ffreestanding -nostdlib -nostdinc
+CFLAGS = -ffreestanding -nostdlib -mgeneral-regs-only -I/usr/lib/gcc/i686-elf/15.2.0/include
 LDFLAGS = -T kernel/kernel.ld --oformat binary
 
 BUILDS=build
 
 all: $(BUILDS)/disk.img
 
+#bootloader targets
 bootloader/bootloader.bin: bootloader/boot.asm
 	$(ASM) -f bin $< -o $@
 
+#kernel related targets
 kernel/kernel_entry.o: kernel/kernel_entry.asm
 	$(ASM) -f elf32 $< -o $@
 
 kernel/kernel.o: kernel/kernel.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-kernel/kernel.bin: kernel/kernel_entry.o kernel/kernel.o
+kernel/kernel.bin: kernel/kernel_entry.o kernel/kernel.o kernel/idt/idt.o kernel/vga/vga.o
 	$(LD) $(LDFLAGS) $^ -o $@
+
+#kernel internal libs & utils targets
+kernel/idt/idt.o: kernel/idt/idt.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+kernel/vga/vga.o: kernel/vga/vga.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
 
 $(BUILDS)/disk.img: kernel/kernel.bin bootloader/bootloader.bin
 	dd if=/dev/zero of=$@ bs=512 count=20
