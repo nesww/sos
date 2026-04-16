@@ -1,9 +1,11 @@
 #include "idt/idt.h"
+#include "pic/pic.h"
 #include "vga/vga.h"
 
 void kernel_main(void) {
     vga_clear();
+    pic_init();
     idt_init();
-    int a = 1/0; //test interrupt 0 => division by zero
+    __asm__ volatile("sti");
     while(1);
 }

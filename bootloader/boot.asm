@@ -21,7 +21,7 @@ section .text
 ; load kernel code from the disk
 disk_load:
     mov ah, 0x02
-    mov al, 5
+    mov al, KERNEL_SECTORS ; see Makefile for KERNEL_SECTORS
     mov ch, 0
     mov cl, 2
     mov dh, 0
@@ -56,7 +56,8 @@ pm_start:
     mov gs, ax
     mov ebp, 0x90000
     mov esp, ebp
-    jmp 0x10000
+    mov eax, 0x10000
+    jmp eax
 
 boot_drive db 0
 
