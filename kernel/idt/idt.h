@@ -2,10 +2,11 @@
 #define IDT_H
 
 #include <stdint.h>
+#include "../types.h"
 
 #define IDT_TAB_SIZE 256
 
-void isr_handler(int num);
+void isr_handler(int num, struct interrupt_frame *frame);
 void idt_init(void);
 
 // INTERRUPTS
@@ -16,17 +17,10 @@ void idt_init(void);
 #define INT_PAGE_FAULT 14
 
 
-struct interrupt_frame {
-    uint32_t ip;
-    uint32_t cs;
-    uint32_t flags;
-    uint32_t sp;
-    uint32_t ss;
-};
 
 #define ISR(num) \
     __attribute__((interrupt)) void isr##num(struct interrupt_frame *frame) { \
-        isr_handler(num); \
+        isr_handler(num, frame); \
     }
 
 typedef struct {

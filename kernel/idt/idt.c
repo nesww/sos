@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include "../vga/vga.h"
 #include "../pic/pic.h"
+#include "../panic/panic.h"
 static idt_entry idt[IDT_TAB_SIZE];
 
 //intel legacy ISRs
@@ -93,20 +94,20 @@ void idt_init(void) {
     );
 }
 
-void isr_handler(int num) {
+void isr_handler(int num, struct interrupt_frame *frame) {
     if (num < 32) {
-        switch(num) {
-            //legacy ints
-            case INT_DIVZERO:           vga_print("INT: division by zero");            break;
-            case INT_INVALID_OPCODE:    vga_print("INT: invalid opcode");              break;
-            case INT_DOUBLE_FAULT:      vga_print("INT: double fault");                break;
-            case INT_GEN_PROTECT_FAULT: vga_print("INT: generation protection fault"); break;
-            case INT_PAGE_FAULT:        vga_print("INT: page fault");                  break;
-            default: vga_print("INT: unknown exception or not handled"); vga_putint(num);            break;
+        kernel_panic(num, frame);
+        /* for now suspending since no proper process management, killing kernel */
+        // switch(num) {
+        //     //legacy ints
+        //     case INT_DIVZERO:           vga_print("INT: division by zero");            break;
+        //     case INT_INVALID_OPCODE:    vga_print("INT: invalid opcode");              break;
+        //     case INT_DOUBLE_FAULT:      vga_print("INT: double fault");                break;
+        //     case INT_GEN_PROTECT_FAULT: vga_print("INT: generation protection fault"); break;
+        //     case INT_PAGE_FAULT:        vga_print("INT: page fault");                  break;
+        //     default: vga_print("INT: unknown exception or not handled"); vga_putint(num);            break;
 
-        }
-        vga_print("   /!\\ halting");
-        __asm__ volatile("hlt");
+        // }
     } else {
         switch(num) {
             //PIC ints
@@ -130,9 +131,7 @@ void isr_handler(int num) {
             case INT_PIC_ATA_PRIMARY:       vga_print("INT_PIC: ATA primary disk");    break;
             case INT_PIC_ATA_SECONDARY:     vga_print("INT_PIC: ATA secondary disk");  break;
             default:
-                vga_print("INT_PIC: unknown exception or not handled ");
-                vga_putint(num);
-                __vga_new_line();
+                vga_printf("INT_PIC: unknown exception or not handled: %d\n", num);
                 break;
         }
         pic_sendEOI(num - PIC_INT_OFFSET);

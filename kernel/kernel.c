@@ -7,5 +7,6 @@ void kernel_main(void) {
     pic_init();
     idt_init();
     __asm__ volatile("sti");
+    int a = 1/0;
     while(1);
 }
