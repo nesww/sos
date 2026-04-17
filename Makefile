@@ -23,14 +23,17 @@ kernel/kernel_entry.o: kernel/kernel_entry.asm
 kernel/kernel.o: kernel/kernel.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-kernel/kernel.bin: kernel/kernel_entry.o kernel/kernel.o kernel/idt/idt.o kernel/vga/vga.o
+kernel/kernel.bin: kernel/kernel_entry.o kernel/kernel.o kernel/idt/idt.o kernel/vga/vga.o kernel/mem/mem.o
 	$(LD) $(LDFLAGS) $^ -o $@
 
-#kernel internal libs & utils targets
+#kernel internal & utils targets
 kernel/idt/idt.o: kernel/idt/idt.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 kernel/vga/vga.o: kernel/vga/vga.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+kernel/mem/mem.o: kernel/mem/mem.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 

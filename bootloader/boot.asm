@@ -15,6 +15,7 @@ section .text
   mov [boot_drive], dl
   sti
   call disk_load
+  call memory_map
   call enter_pm
   hlt
 
@@ -35,6 +36,29 @@ disk_load:
 
 disk_error:
     hlt
+
+memory_map:
+    ;counter for memory map entries
+    mov dword [0x500], 0
+    ;start of memory map
+    mov di, 0x504
+    xor ax, ax
+    mov es, ax
+    xor ebx, ebx            ; make the interruption start at entry 0
+.memory_map_start:
+    ;configure interrupt
+    mov eax, 0xe820         ; int 0x15 function number
+    mov ecx, 24             ; 24 bytes for one entry
+    mov edx, 0x534d4150      ; SMAP signature
+    int 0x15
+
+    inc dword [0x500]
+    add di, 24
+    test ebx, ebx
+    jz .done
+    jmp .memory_map_start
+.done:
+    ret
 
 ; enter in protected mode (32 bits)
 enter_pm:

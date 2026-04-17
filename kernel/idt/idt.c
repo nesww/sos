@@ -3,59 +3,9 @@
 #include "../vga/vga.h"
 #include "../pic/pic.h"
 #include "../panic/panic.h"
+#include "idt_declare.h"
 static idt_entry idt[IDT_TAB_SIZE];
 
-//intel legacy ISRs
-ISR(0)
-ISR(1);
-ISR(2);
-ISR(3);
-ISR(4);
-ISR(5);
-ISR(6);
-ISR(7);
-ISR(8);
-ISR(9);
-ISR(10);
-ISR(11);
-ISR(12);
-ISR(13);
-ISR(14);
-ISR(15);
-ISR(16);
-ISR(17);
-ISR(18);
-ISR(19);
-ISR(20);
-ISR(21);
-ISR(22);
-ISR(23);
-ISR(24);
-ISR(25);
-ISR(26);
-ISR(27);
-ISR(28);
-ISR(29);
-ISR(30);
-ISR(31);
-
-// PIC ISRs
-ISR(32);
-ISR(33);
-ISR(34);
-ISR(35);
-ISR(36);
-ISR(37);
-ISR(38);
-ISR(39);
-ISR(40);
-ISR(41);
-ISR(42);
-ISR(43);
-ISR(44);
-ISR(45);
-ISR(46);
-ISR(47);
 
 void _idt_set_entry(int num, void(*isr_wrapper)(struct interrupt_frame *)) {
     idt_entry entry = {0};
@@ -96,7 +46,7 @@ void idt_init(void) {
 
 void isr_handler(int num, struct interrupt_frame *frame) {
     if (num < 32) {
-        kernel_panic(num, frame);
+        kernel_panic_isr(num, frame);
         /* for now suspending since no proper process management, killing kernel */
         // switch(num) {
         //     //legacy ints
@@ -114,10 +64,8 @@ void isr_handler(int num, struct interrupt_frame *frame) {
             // PIC master IRQs
             case INT_PIC_TIMER:          /*vga_print("INT_PIC: timer");*/              break;
             case INT_PIC_KEYBOARD:
-                vga_print("INT_PIC: keyboard, scancode: ");
                 uint8_t scancode = inb(IO_KEYBOARD_DATA_PORT);
-                vga_puthex(scancode);
-                vga_println("");
+                vga_printf("INT_PIC: keyboard, scancode: %d\n", scancode);
                 break;
             case INT_PIC_SERIAL_COM2:       vga_print("INT_PIC: serial COM2");         break;
             case INT_PIC_SERIAL_COM1:       vga_print("INT_PIC: serial COM1");         break;

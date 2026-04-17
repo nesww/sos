@@ -1,14 +1,19 @@
-/* The sole purpose of this core header is to centralize headers for common usage of the kernel */
-
 #ifndef KCORE_H
 #define KCORE_H
 
-#include <stdint.h>
+#define TRUE 1
+#define FALSE
 
-#ifdef KLIB_STRING_IMPLEMENTATION
+#define KMIN(a,b) ((a) < (b) ? (a) : (b))
+#define KMAX(a,b) ((a) > (b) ? (a) : (b))
 
-#include "kstring.h"
+#define KB(x) ((x) * 1024)
+#define MB(x) ((x) * 1024 * 1024)
 
-#endif // KLIB_STRING_IMPLEMENTATION
+#define TODO(str)                           \
+    do {                                    \
+        if (str)                            \
+            vga_printf("TODO: " #str "\n"); \
+    } while(0)                              \
 
 #endif //K_CORE_H
