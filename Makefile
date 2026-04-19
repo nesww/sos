@@ -5,7 +5,7 @@ LD = i686-elf-ld
 CFLAGS = -ffreestanding -nostdlib -mgeneral-regs-only -I/usr/lib/gcc/i686-elf/15.2.0/include
 LDFLAGS = -T kernel/kernel.ld --oformat binary
 
-KERNEL_BIN_DEPS=kernel/idt/idt.o kernel/vga/vga.o kernel/mem/mem.o kernel/kb/kb.o
+KERNEL_BIN_DEPS=kernel/idt/idt.o kernel/vga/vga.o kernel/mem/mem.o kernel/kb/kb.o kernel/frame/frame.o
 
 #for calculating automatically value for AL in bootloader/boot.asm for loading all sectors for the kernel
 KERNEL_SECTORS=$(shell expr $$(wc -c < kernel/kernel.bin) / 512 + 2)
@@ -41,6 +41,8 @@ kernel/mem/mem.o: kernel/mem/mem.c
 kernel/kb/kb.o: kernel/kb/kb.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
+kernel/frame/frame.o: kernel/frame/frame.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILDS)/disk.img: kernel/kernel.bin bootloader/bootloader.bin
 	dd if=/dev/zero of=$@ bs=512 count=20

@@ -2,7 +2,7 @@
 #define KCORE_H
 
 #define TRUE 1
-#define FALSE
+#define FALSE 0
 
 #define KMIN(a,b) ((a) < (b) ? (a) : (b))
 #define KMAX(a,b) ((a) > (b) ? (a) : (b))

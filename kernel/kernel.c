@@ -3,6 +3,7 @@
 #include "pic/pic.h"
 #include "vga/vga.h"
 #include "mem/mem.h"
+#include "frame/frame.h"
 #include <stdint.h>
 #include "lib/kmem.h"
 
@@ -12,6 +13,7 @@ static void __kernel_init(void) {
     pic_init();
     idt_init();
     mem_heap_init();
+    fa_init();
     INTERRUPTS_ENABLE();
     vga_printf("kernel started successfully!\n");
 }
