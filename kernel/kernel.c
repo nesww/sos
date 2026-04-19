@@ -8,10 +8,11 @@
 
 static void __kernel_init(void) {
     vga_clear();
+    vga_enable_cursor();
     pic_init();
     idt_init();
     mem_heap_init();
-    __asm__ volatile("sti");
+    INTERRUPTS_ENABLE();
     vga_printf("kernel started successfully!\n");
 }
 

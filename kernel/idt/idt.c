@@ -3,6 +3,7 @@
 #include "../vga/vga.h"
 #include "../pic/pic.h"
 #include "../panic/panic.h"
+#include "../kb/kb.h"
 #include "idt_declare.h"
 static idt_entry idt[IDT_TAB_SIZE];
 
@@ -64,8 +65,7 @@ void isr_handler(int num, struct interrupt_frame *frame) {
             // PIC master IRQs
             case INT_PIC_TIMER:          /*vga_print("INT_PIC: timer");*/              break;
             case INT_PIC_KEYBOARD:
-                uint8_t scancode = inb(IO_KEYBOARD_DATA_PORT);
-                vga_printf("INT_PIC: keyboard, scancode: %d\n", scancode);
+                kb_handle_interrupt();
                 break;
             case INT_PIC_SERIAL_COM2:       vga_print("INT_PIC: serial COM2");         break;
             case INT_PIC_SERIAL_COM1:       vga_print("INT_PIC: serial COM1");         break;

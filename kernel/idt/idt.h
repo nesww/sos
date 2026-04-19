@@ -6,6 +6,12 @@
 
 #define IDT_TAB_SIZE 256
 
+#define INTERRUPTS_DISABLE() \
+    __asm__ volatile("cli") \
+
+#define INTERRUPTS_ENABLE() \
+    __asm__ volatile("sti") \
+
 void isr_handler(int num, struct interrupt_frame *frame);
 void idt_init(void);
 

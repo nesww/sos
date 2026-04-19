@@ -24,6 +24,7 @@
 #define VGA_YELLOW        0xe
 #define VGA_WHITE         0xf
 
+void vga_enable_cursor(void);
 void vga_clear();
 void vga_cclear(uint8_t color);
 void vga_print(const char *str);
@@ -33,6 +34,7 @@ void vga_putint(int num);
 void vga_puthex(uint8_t num);
 void vga_puthex32(uint32_t num);
 void vga_printf(const char *str, ...);
+void vga_backspace(void);
 
 /* only 4 first bits will be used, */
 void vga_setforeground_color(uint8_t fg);

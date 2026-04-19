@@ -5,6 +5,8 @@ LD = i686-elf-ld
 CFLAGS = -ffreestanding -nostdlib -mgeneral-regs-only -I/usr/lib/gcc/i686-elf/15.2.0/include
 LDFLAGS = -T kernel/kernel.ld --oformat binary
 
+KERNEL_BIN_DEPS=kernel/idt/idt.o kernel/vga/vga.o kernel/mem/mem.o kernel/kb/kb.o
+
 #for calculating automatically value for AL in bootloader/boot.asm for loading all sectors for the kernel
 KERNEL_SECTORS=$(shell expr $$(wc -c < kernel/kernel.bin) / 512 + 2)
 
@@ -23,7 +25,7 @@ kernel/kernel_entry.o: kernel/kernel_entry.asm
 kernel/kernel.o: kernel/kernel.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-kernel/kernel.bin: kernel/kernel_entry.o kernel/kernel.o kernel/idt/idt.o kernel/vga/vga.o kernel/mem/mem.o
+kernel/kernel.bin: kernel/kernel_entry.o kernel/kernel.o $(KERNEL_BIN_DEPS)
 	$(LD) $(LDFLAGS) $^ -o $@
 
 #kernel internal & utils targets
@@ -36,6 +38,9 @@ kernel/vga/vga.o: kernel/vga/vga.c
 kernel/mem/mem.o: kernel/mem/mem.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
+kernel/kb/kb.o: kernel/kb/kb.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
 
 $(BUILDS)/disk.img: kernel/kernel.bin bootloader/bootloader.bin
 	dd if=/dev/zero of=$@ bs=512 count=20
@@ -43,7 +48,7 @@ $(BUILDS)/disk.img: kernel/kernel.bin bootloader/bootloader.bin
 	dd if=kernel/kernel.bin of=$@ bs=512 seek=1 conv=notrunc
 
 clean:
-	rm -f bootloader/bootloader.bin kernel/kernel_entry.o kernel/kernel.o kernel/kernel.bin kernel/idt/idt.o kernel/vga/vga.o $(BUILDS)/disk.img
+	rm -f bootloader/bootloader.bin kernel/kernel_entry.o kernel/kernel.o kernel/kernel.bin $(KERNEL_BIN_DEPS) $(BUILDS)/disk.img
 
 run: $(BUILDS)/disk.img
 	qemu-system-i386 -drive format=raw,file=$< -display sdl
