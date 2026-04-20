@@ -7,6 +7,7 @@
 
 static uint8_t *fa_bitmap;
 static uint32_t fa_bitmap_size = 0;
+static uint8_t fa_initialized = FALSE;
 
 void __fa_init_alloc_bitmap(void) {
     mmap_entry *entries = mem_get_mmap_entries();
@@ -33,14 +34,17 @@ void fa_init(void) {
     uint32_t frame_index_start = start_fa_usable / 4096;
     uint32_t end_fa_usable = usable_entry.base_addr + usable_entry.region_len;
     uint32_t frame_index_end = end_fa_usable / 4096;
+
     for (uint32_t i = frame_index_start; i < frame_index_end; ++i) {
         uint32_t byte = i / 8;
         uint32_t bit = i % 8;
         fa_bitmap[byte] &= ~(1 << bit);
     }
+    fa_initialized = TRUE;
 }
 
 void *fa_alloc() {
+    if (!fa_initialized) kernel_panic("FRAME_ALLOCATOR_NOT_INITIALIZED: tried to allocate on the frame allocator without initializing it!");
     uint32_t frame_byte_index = 0;
     uint8_t frame_bit_index = 0;
     uint32_t i = 0;
@@ -59,7 +63,7 @@ void *fa_alloc() {
     }
     if (free_found) {
         uint32_t frame_index = frame_byte_index * 8 + frame_bit_index;
-        fa_bitmap[frame_byte_index] |= ~(1<< frame_bit_index);
+        fa_bitmap[frame_byte_index] |= (1<< frame_bit_index);
         return (void*)(frame_index*4096);
     }
     kernel_panic("could not allocate for frame allocator: no free frame available!");
@@ -67,6 +71,7 @@ void *fa_alloc() {
 }
 
 void fa_free(uint32_t addr) {
+    if (!fa_initialized) kernel_panic("FRAME_ALLOCATOR_NOT_INITIALIZED: tried to free on the frame allocator without initializing it!");
     uint32_t frame_index = addr / 4096;
     uint32_t byte = frame_index / 8;
     uint8_t bit = frame_index % 8;

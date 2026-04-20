@@ -25,4 +25,13 @@ static void kernel_panic(const char *msg) {
     PANIC_HLT();
 }
 
+static void kernel_panicf(const char *msg, ...) {
+    __panic_init();
+    va_list args;
+    va_start(args, msg);
+    vga_printf("KERNEL_PANIC\n");
+    vga_vprintf(msg, args);
+    PANIC_HLT();
+}
+
 #endif //KERNEL_PANIC_H

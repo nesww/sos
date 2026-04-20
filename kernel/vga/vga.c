@@ -91,7 +91,6 @@ void vga_puthex32(uint32_t num) {
     }
 }
 
-
 void vga_printf(const char *str, ...) {
     if (!str) {
         return;
@@ -99,6 +98,10 @@ void vga_printf(const char *str, ...) {
 
     va_list args;
     va_start(args, str);
+    vga_vprintf(str, args);
+}
+
+void vga_vprintf(const char *str, va_list args) {
     uint32_t i = 0;
 
     while(str[i]) {

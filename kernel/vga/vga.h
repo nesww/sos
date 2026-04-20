@@ -1,6 +1,7 @@
 #ifndef VGA_H
 #define VGA_H
 
+#include <stdarg.h>
 #include <stdint.h>
 
 #define VGA_ADDRESS 0xB8000
@@ -34,6 +35,7 @@ void vga_putint(int num);
 void vga_puthex(uint8_t num);
 void vga_puthex32(uint32_t num);
 void vga_printf(const char *str, ...);
+void vga_vprintf(const char *str, va_list args);
 void vga_backspace(void);
 
 /* only 4 first bits will be used, */

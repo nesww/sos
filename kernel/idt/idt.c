@@ -8,7 +8,7 @@
 static idt_entry idt[IDT_TAB_SIZE];
 
 
-void _idt_set_entry(int num, void(*isr_wrapper)(struct interrupt_frame *)) {
+void _idt_set_entry(int num, void *isr_wrapper) {
     idt_entry entry = {0};
     entry.zero = 0x0;
     entry.segment_selector = 0x08;
@@ -20,7 +20,7 @@ void _idt_set_entry(int num, void(*isr_wrapper)(struct interrupt_frame *)) {
 }
 
 void idt_init(void) {
-    void(*handlers[])(struct interrupt_frame *) = {
+    void* handlers[] = {
         // intel legacy ISRs
         isr0, isr1, isr2, isr3, isr4, isr5, isr6, isr7, isr8, isr9, isr10,
         isr11, isr12, isr13, isr14, isr15, isr16, isr17, isr18, isr19, isr20,
@@ -47,6 +47,11 @@ void idt_init(void) {
 
 void isr_handler(int num, struct interrupt_frame *frame) {
     if (num < 32) {
+        if (num == INT_PAGE_FAULT) {
+            uint32_t cr2;
+            __asm__ volatile("mov %%cr2, %0" : "=r"(cr2));
+            kernel_panicf("PAGE_FAULT: faulty address: %x\n> IP: %x", cr2, frame->ip);
+        }
         kernel_panic_isr(num, frame);
         /* for now suspending since no proper process management, killing kernel */
         // switch(num) {

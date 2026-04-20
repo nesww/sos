@@ -29,6 +29,11 @@ void idt_init(void);
         isr_handler(num, frame); \
     }
 
+#define ISR_ERR(num) \
+    __attribute__((interrupt)) void isr##num(struct interrupt_frame *frame, uintptr_t error_code) { \
+        isr_handler(num, frame); \
+    }
+
 typedef struct {
     uint16_t low_handler_addr;
     uint16_t segment_selector;
