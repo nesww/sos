@@ -15,7 +15,7 @@ static void __kernel_init(void) {
     idt_init();
     mem_heap_init();
     fa_init();
-    paging_init();
+    paging_kernel_init();
     INTERRUPTS_ENABLE();
     vga_printf("kernel started successfully!\n");
 }
@@ -35,14 +35,8 @@ void kernel_main(void) {
     vga_printf("CR0: %x\n", cr0);
 
     //triggering a page fault for panicking on access to non-paged memory address for kernel page directory
-    uint32_t *not_cool = (uint32_t*)0xDEAD0000;
-    *not_cool = 0;
-
-    //will never be reach, for now
-    void *x = kmalloc(MB(3)); //set it to 10 instead of 3 if you want panic for max heap allocation overflow
-    // int a = 0/0; //uncomment if you want kernel panic with divzero & intframe
-    kfree(ptr);
-    kfree(x);
+    // uint32_t *not_cool = (uint32_t*)0xDEAD0000;
+    // *not_cool = 0;
 
     while(1);
 }
