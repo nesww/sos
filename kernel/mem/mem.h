@@ -28,13 +28,6 @@ static inline mmap_entry *mem_get_mmap_entries(void) {
     return (mmap_entry*)0x504;
 }
 
-void mem_heap_init(void);
-void *mem_heap_alloc(uint32_t size);
-void mem_heap_free(void *ptr);
-
-void *mem_heap_get_start(void);
-uint32_t mem_heap_get_size(void);
-
 mmap_entry mmap_get_usable_entry(void);
 
 

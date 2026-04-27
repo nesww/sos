@@ -5,7 +5,7 @@ LD = i686-elf-ld
 CFLAGS = -ffreestanding -nostdlib -mgeneral-regs-only -I/usr/lib/gcc/i686-elf/15.2.0/include
 LDFLAGS = -T kernel/kernel.ld --oformat binary
 
-KERNEL_BIN_DEPS=kernel/idt/idt.o kernel/vga/vga.o kernel/mem/mem.o kernel/kb/kb.o kernel/frame/frame.o kernel/paging/paging.o
+KERNEL_BIN_DEPS=kernel/idt/idt.o kernel/vga/vga.o kernel/mem/mem.o kernel/kb/kb.o kernel/frame/frame.o kernel/paging/paging.o kernel/alloc/alloc.o kernel/serial/serial.o
 
 #for calculating automatically value for AL in bootloader/boot.asm for loading all sectors for the kernel
 KERNEL_SECTORS=$(shell expr $$(wc -c < kernel/kernel.bin) / 512 + 2)
@@ -47,6 +47,9 @@ kernel/frame/frame.o: kernel/frame/frame.c
 kernel/paging/paging.o: kernel/paging/paging.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
+kernel/serial/serial.o: kernel/serial/serial.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
 $(BUILDS)/disk.img: kernel/kernel.bin bootloader/bootloader.bin
 	dd if=/dev/zero of=$@ bs=512 count=20
 	dd if=bootloader/bootloader.bin of=$@ conv=notrunc
@@ -56,7 +59,7 @@ clean:
 	rm -f bootloader/bootloader.bin kernel/kernel_entry.o kernel/kernel.o kernel/kernel.bin $(KERNEL_BIN_DEPS) $(BUILDS)/disk.img
 
 run: $(BUILDS)/disk.img
-	qemu-system-i386 -drive format=raw,file=$< -display sdl
+	qemu-system-i386 -drive format=raw,file=$< -display sdl -serial stdio
 
 run-debug-int: $(BUILDS)/disk.img
 	qemu-system-i386 -drive format=raw,file=$< -display sdl -d int

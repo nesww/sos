@@ -12,9 +12,11 @@ Now:
 - IDT table for legacy intel interruptions
 - IDT table for PIC (keyboard & IO)
 - currently, print out the scancode in hex of the typed key (no scrolling on VGA yet, coming soon)
-- dumb bump memory allocator for a basic heap, no free yet
+- buddy memory allocator for the kernel (used by kmalloc & kfree) for allocation on the heap
 - frame allocator to segment free memory (after the heap) into blocks of 4kb
 - paging for virtual memory addresses, with, for the kernel its own page directory, required for future processes isolation in memory
+- processes exists, but no scheduling yet
+- serial output available for writing on stdio with QEMU, mostly for debugging purposes
 
 Coming:
 - Processes and scheduling

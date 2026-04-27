@@ -1,22 +1,30 @@
+#include "alloc/alloc.h"
 #include "idt/idt.h"
-#include "lib/kcore.h"
 #include "pic/pic.h"
+#include "serial/serial.h"
 #include "vga/vga.h"
-#include "mem/mem.h"
+#include "alloc/alloc.h"
 #include "frame/frame.h"
 #include "paging/paging.h"
 #include <stdint.h>
 #include "lib/kmem.h"
 
+#define SOS_VER_MAJOR 0
+#define SOS_VER_MINOR 0
+#define SOS_VER_PATCH 1
+
 static void __kernel_init(void) {
+    serial_init();
     vga_clear();
     vga_enable_cursor();
     pic_init();
     idt_init();
-    mem_heap_init();
+    kheap_init();
     fa_init();
     paging_kernel_init();
     INTERRUPTS_ENABLE();
+
+    vga_printf("sOS - v%d.%d.%d\n", SOS_VER_MAJOR, SOS_VER_MINOR, SOS_VER_PATCH);
     vga_printf("kernel started successfully!\n");
 }
 
@@ -30,13 +38,19 @@ void kernel_main(void) {
     *ptr = 0xDEADBEEF;
     vga_printf("kmalloc test: %x\n", *ptr);
 
+    kfree(ptr);
+    kfree(0); // will not page fault :)
+
     uint32_t cr0;
     __asm__ volatile("mov %%cr0, %0" : "=r"(cr0));
     vga_printf("CR0: %x\n", cr0);
 
-    //triggering a page fault for panicking on access to non-paged memory address for kernel page directory
-    // uint32_t *not_cool = (uint32_t*)0xDEAD0000;
-    // *not_cool = 0;
+
+    //test for kernel heap memory allocator
+    void *A = kmalloc(16);
+    void *B = kmalloc(16);
+    kfree(A);
+    kfree(B);
 
     while(1);
 }

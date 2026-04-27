@@ -101,9 +101,8 @@ void vga_printf(const char *str, ...) {
     vga_vprintf(str, args);
 }
 
-void vga_vprintf(const char *str, va_list args) {
+void vga_vprintf_to(void (*putchar_fn)(char), void(*newline_fn)(void), const char *str, va_list args) {
     uint32_t i = 0;
-
     while(str[i]) {
         char c = str[i];
         if (c == '%') {
@@ -111,32 +110,40 @@ void vga_vprintf(const char *str, va_list args) {
                 switch(str[i+1]) {
                     case 's':
                         char *s = va_arg(args, char *);
-                        vga_print(s);
+                        while (*s) putchar_fn(*s++);
                         i++;
                         break;
                     case 'd':
                         int n = va_arg(args, int);
-                        vga_putint(n);
+                        if (n >= 10) putchar_fn('0' + n / 10);
+                        putchar_fn('0' + n % 10);
                         i++;
                         break;
-                    case 'x':
+                    case 'x': {
                         uint32_t x = va_arg(args, uint32_t);
-                        vga_puthex32(x);
+                        char hex[] = "0123456789ABCDEF";
+                        putchar_fn('0'); putchar_fn('x');
+                        for (int j = 7; j >= 0; --j)
+                            putchar_fn(hex[(x >> (j*4)) & 0xF]);
                         i++;
                         break;
+                    }
                     default: break;
                 }
             } else {
-                vga_putchar(c);
+                putchar_fn(c);
             }
         } else if (c == '\n') {
-            __vga_new_line();
+            newline_fn();
         } else {
-            vga_putchar(c);
+            putchar_fn(c);
         }
         i++;
     }
-    va_end(args);
+}
+
+void vga_vprintf(const char *str, va_list args) {
+    vga_vprintf_to(vga_putchar, __vga_new_line, str, args);
 }
 
 void vga_backspace(void) {

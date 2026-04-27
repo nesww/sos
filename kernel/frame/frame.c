@@ -30,7 +30,7 @@ void fa_init(void) {
     }
 
     mmap_entry usable_entry = mmap_get_usable_entry();
-    uint32_t start_fa_usable = (uint32_t)mem_heap_get_start() + mem_heap_get_size();
+    uint32_t start_fa_usable = (uint32_t)kheap_get_start() + kheap_get_size();
     uint32_t frame_index_start = start_fa_usable / 4096;
     uint32_t end_fa_usable = usable_entry.base_addr + usable_entry.region_len;
     uint32_t frame_index_end = end_fa_usable / 4096;
