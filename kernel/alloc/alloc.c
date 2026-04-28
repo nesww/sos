@@ -1,9 +1,8 @@
 #include "alloc.h"
 
-#include "../lib/kcore.h"
+#include "../lib/core.h"
 #include "../panic/panic.h"
 #include "../mem/mem.h"
-#include "../serial/serial.h"
 
 #include <stdint.h>
 

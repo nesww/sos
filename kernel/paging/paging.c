@@ -1,8 +1,8 @@
 #include "paging.h"
 #include "../frame/frame.h"
 #include "../panic/panic.h"
-#include "../alloc/alloc.h"
-#include "../lib/kcore.h"
+#include "../mem/mem.h"
+#include "../lib/core.h"
 #include <stdint.h>
 
 static page_directory *kernel_pd;
@@ -15,7 +15,8 @@ page_directory *paging_kernel_init(void) {
     }
     paging_initialized = TRUE;
 
-    for (uint32_t addr = 0; addr < (uint32_t)kheap_get_start() + kheap_get_size(); addr+=4096) {
+    mmap_entry entry = mmap_get_usable_entry();
+    for (uint32_t addr = 0; addr < entry.base_addr + entry.region_len; addr+=4096) {
         paging_map(kernel_pd, addr, addr, PAGING_PD_ENTRY_FLAGS_KERNEL_ONLY);
     }
 

@@ -1,5 +1,5 @@
 #include "proc.h"
-#include "../lib/kmem.h"
+#include "../lib/stdmem.h"
 #include "../frame/frame.h"
 
 static uint32_t pid_counter = 1;
@@ -10,6 +10,11 @@ proc *proc_create(void(*entry)() /*uint32_t priority*/) {
     p->proc_pd = paging_create_pd();
 
     p->kernel_stack = (uint32_t)fa_alloc() + 4096;
+    proc_registers_state ctx = {0};
+    ctx.eip = (uint32_t)entry;
+    ctx.cs = 0x08;
+    ctx.eflags = 0x202;
+    p->kernel_stack = (uint32_t)kmemcpy((void*)(p->kernel_stack - sizeof(proc_registers_state)), &ctx, sizeof(proc_registers_state));
     for (uint32_t i = 0; i < 4; ++i) {
         uint32_t frame = (uint32_t)fa_alloc();
         uint32_t vaddr = PROC_USER_STACK_TOP_VADDR - (i+1) * 4096;
@@ -19,13 +24,14 @@ proc *proc_create(void(*entry)() /*uint32_t priority*/) {
     p->reg_states.esp = PROC_USER_STACK_TOP_VADDR;
     p->reg_states.eip = (uint32_t)entry;
     p->reg_states.eflags = 0x202;
+    p->reg_states.cs = 0x08; //from GDT -> code section
 
     p->proc_state = READY;
     return p;
 }
 
 void proc_destroy(proc *p) {
-    fa_free(p->kernel_stack - 4096);
+    fa_free(p->kernel_stack + sizeof(proc_registers_state) - 4096);
     page_table *pt;
     for (uint32_t i = 0; i < 4; ++i) {
         uint32_t vaddr = PROC_USER_STACK_TOP_VADDR - (i+1) * 4096;

@@ -1,8 +1,9 @@
 #include "idt.h"
 #include <stdint.h>
 #include "../vga/vga.h"
+#include "../serial/serial.h"
 #include "../pic/pic.h"
-#include "../panic/panic.h"
+#include "../../panic/panic.h"
 #include "../kb/kb.h"
 #include "idt_declare.h"
 static idt_entry idt[IDT_TAB_SIZE];
@@ -26,7 +27,7 @@ void idt_init(void) {
         isr11, isr12, isr13, isr14, isr15, isr16, isr17, isr18, isr19, isr20,
         isr21, isr22, isr23, isr24, isr25, isr26, isr27, isr28, isr29, isr30, isr31,
         // PIC ISRs
-        isr32, isr33, isr34, isr35, isr36, isr37, isr38, isr39, isr40, isr41, isr42, isr43, isr44, isr45, isr46, isr47
+        isr_timer_stub, isr33, isr34, isr35, isr36, isr37, isr38, isr39, isr40, isr41, isr42, isr43, isr44, isr45, isr46, isr47
     };
 
     for (int i = 0; i < 48; ++i) {
@@ -46,24 +47,15 @@ void idt_init(void) {
 }
 
 void isr_handler(int num, struct interrupt_frame *frame) {
-    if (num < 32) {
+    if (num <= 32) {
+        //TODO: change to a switch when other ints are handled
         if (num == INT_PAGE_FAULT) {
             uint32_t cr2;
             __asm__ volatile("mov %%cr2, %0" : "=r"(cr2));
             kernel_panicf("PAGE_FAULT: faulty address: %x\n> IP: %x", cr2, frame->ip);
+        } else {
+            kernel_panic_isr(num, frame);
         }
-        kernel_panic_isr(num, frame);
-        /* for now suspending since no proper process management, killing kernel */
-        // switch(num) {
-        //     //legacy ints
-        //     case INT_DIVZERO:           vga_print("INT: division by zero");            break;
-        //     case INT_INVALID_OPCODE:    vga_print("INT: invalid opcode");              break;
-        //     case INT_DOUBLE_FAULT:      vga_print("INT: double fault");                break;
-        //     case INT_GEN_PROTECT_FAULT: vga_print("INT: generation protection fault"); break;
-        //     case INT_PAGE_FAULT:        vga_print("INT: page fault");                  break;
-        //     default: vga_print("INT: unknown exception or not handled"); vga_putint(num);            break;
-
-        // }
     } else {
         switch(num) {
             //PIC ints

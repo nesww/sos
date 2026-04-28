@@ -1,5 +1,6 @@
 #include "vga.h"
 #include "../io/io.h"
+#include "../idt/idt.h"
 #include <stdarg.h>
 #include <stdint.h>
 

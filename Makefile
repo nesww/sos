@@ -5,7 +5,8 @@ LD = i686-elf-ld
 CFLAGS = -ffreestanding -nostdlib -mgeneral-regs-only -I/usr/lib/gcc/i686-elf/15.2.0/include
 LDFLAGS = -T kernel/kernel.ld --oformat binary
 
-KERNEL_BIN_DEPS=kernel/idt/idt.o kernel/vga/vga.o kernel/mem/mem.o kernel/kb/kb.o kernel/frame/frame.o kernel/paging/paging.o kernel/alloc/alloc.o kernel/serial/serial.o
+KERNEL_SRCS = $(shell find kernel -mindepth 2 -name '*.c')
+KERNEL_BIN_DEPS = $(KERNEL_SRCS:.c=.o) kernel/hw/pit/pit_asm.o
 
 #for calculating automatically value for AL in bootloader/boot.asm for loading all sectors for the kernel
 KERNEL_SECTORS=$(shell expr $$(wc -c < kernel/kernel.bin) / 512 + 2)
@@ -28,26 +29,13 @@ kernel/kernel.o: kernel/kernel.c
 kernel/kernel.bin: kernel/kernel_entry.o kernel/kernel.o $(KERNEL_BIN_DEPS)
 	$(LD) $(LDFLAGS) $^ -o $@
 
+#pit specific ASM file
+kernel/hw/pit/pit_asm.o: kernel/hw/pit/pit_asm.asm
+	$(ASM) -f elf32 $< -o $@
+
 #kernel internal & utils targets
-kernel/idt/idt.o: kernel/idt/idt.c
-	$(CC) $(CFLAGS) -c $< -o $@
 
-kernel/vga/vga.o: kernel/vga/vga.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-kernel/mem/mem.o: kernel/mem/mem.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-kernel/kb/kb.o: kernel/kb/kb.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-kernel/frame/frame.o: kernel/frame/frame.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-kernel/paging/paging.o: kernel/paging/paging.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-kernel/serial/serial.o: kernel/serial/serial.c
+kernel/%.o: kernel/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILDS)/disk.img: kernel/kernel.bin bootloader/bootloader.bin
@@ -62,4 +50,4 @@ run: $(BUILDS)/disk.img
 	qemu-system-i386 -drive format=raw,file=$< -display sdl -serial stdio
 
 run-debug-int: $(BUILDS)/disk.img
-	qemu-system-i386 -drive format=raw,file=$< -display sdl -d int
+	qemu-system-i386 -drive format=raw,file=$< -display sdl -serial stdio -d int

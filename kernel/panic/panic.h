@@ -1,7 +1,7 @@
 #ifndef KERNEL_PANIC_H
 #define KERNEL_PANIC_H
 
-#include "../vga/vga.h"
+#include "../hw/vga/vga.h"
 #include "../types.h"
 
 #define PANIC_HLT() \

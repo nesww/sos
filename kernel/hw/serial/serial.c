@@ -1,6 +1,6 @@
 #include "serial.h"
-#include "../lib/kcore.h"
-#include "../panic/panic.h"
+#include "../../lib/core.h"
+#include "../../panic/panic.h"
 #include "../vga/vga.h"
 #include <stdarg.h>
 #include <stdint.h>

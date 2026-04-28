@@ -35,7 +35,9 @@ ISR(30);
 ISR(31);
 
 // PIC ISRs
-ISR(32);
+// ISR(32); => will now use ASM pit_asm, dedicated for the scheduler
+extern void isr_timer_stub(void);
+
 ISR(33);
 ISR(34);
 ISR(35);
