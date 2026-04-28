@@ -7,7 +7,7 @@
 #include "frame/frame.h"
 #include "paging/paging.h"
 #include <stdint.h>
-#include "lib/kmem.h"
+#include "lib/stdmem.h"
 
 #define SOS_VER_MAJOR 0
 #define SOS_VER_MINOR 0

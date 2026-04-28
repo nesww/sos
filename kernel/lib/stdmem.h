@@ -1,7 +1,7 @@
 #ifndef KCORE_MEM
 #define KCORE_MEM
 
-#include "kcore.h"
+#include "core.h"
 #include "../alloc/alloc.h"
 
 static inline void *kmalloc(uint32_t size) {
