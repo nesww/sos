@@ -99,6 +99,7 @@ void vga_printf(const char *str, ...) {
     va_list args;
     va_start(args, str);
     vga_vprintf(str, args);
+    va_end(args);
 }
 
 void vga_vprintf_to(void (*putchar_fn)(char), void(*newline_fn)(void), const char *str, va_list args) {
